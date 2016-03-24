@@ -207,7 +207,7 @@ view_model.enhance_entity_with_external_info = function( entity_detail, destinat
 		return; // cannot enhance, foursquare won't know what to do with this
 	//
 	var service_url = 'https://api.foursquare.com/v2/venues/search';
-	var v = '20120321';
+	var v = '20140806';
 	var params = {
 		intent: 'browse',
 		query: entity_detail.name,
@@ -237,10 +237,18 @@ view_model.enhance_entity_with_external_info = function( entity_detail, destinat
 					success: function( data, textStatus, jqXHR ) {
 						if( data.meta.code == 200 ) {
 							var result = data.response.venue;
+							console.log( result );
+							if(!!result.photos.count > 0){
+								var image = result.photos.groups[0].items[0].prefix+"240x240"+result.photos.groups[0].items[0].suffix;
+							}else{
+								var image = '';
+							}
 							var enriched_entity_detail = $.extend({
 								loaded: true,
 								rating: (result.rating / 2.0),
 								review_count: result.stats.checkinsCount,
+								shortUrl: result.shortUrl,
+								image: image,
 								categories: _.map( result.categories, function( elem ) { return elem.name; })
 							}, entity_detail );
 							destination_fn( enriched_entity_detail );

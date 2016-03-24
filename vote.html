@@ -82,6 +82,8 @@ ga('create','UA-39146853-1');ga('send','pageview');
 			</div>
 				<!-- /ko -->
 			<div class="categories" data-bind="text:categories.join(', ')"></div>
+			<div class="image"><img data-bind="attr:{src: image}"></div>
+			<a data-bind="attr:{href:shortUrl, target:'_blank'}">foursquare link</a>
 			<!-- /ko -->
 			<!-- ko if: $root.previous_poll_winner_directions_url() -->
 			<a class="icon directions_link" title="directions" data-bind="attr:{ href:$root.previous_poll_winner_directions_url() }" target="_blank"></a>

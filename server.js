@@ -1,5 +1,6 @@
 // includes
 var express =   require('express');
+//var compression = require('compression');
 var http =      require('http');
 var socket_io = require('socket.io');
 var fs  =       require('fs');
@@ -12,6 +13,7 @@ var server = http.createServer( app );
 var io = socket_io.listen( server );
 // static configs
 io.set( 'log level', 1 ); // 0 - 4, ascending verbosity
+
 app.use( express.compress() ); // gzip compression
 mt = new mt.MersenneTwister19937;
 // config-file config
@@ -51,7 +53,10 @@ app.post( '/new', function( request, response ) {
 	// if( !primary_host_check( request, response ) )
 	// 	return;
 	var group_config = new GroupConfig();
+	var defualt_entities = JSON.parse( fs.readFileSync( 'data/template.group.json', 'utf8' ));
 	group_config.id = generate_new_group_id();
+	group_config.entities = defualt_entities.entities;
+	group_config.location = defualt_entities.location;
 	save_group( group_config );
 	response.redirect( '/vote?'+group_config.id );
 });
@@ -482,12 +487,18 @@ function fetch_entities( group_id ) { // fetches just the names; client resolves
 // lower-order functions
 
 function generate_new_group_id() {
-	mt.init_genrand( now().getTime() % 1000000000 );
-	var r = mt.genrand_real2();
-	var id = Math.floor( r*(62*62*62*62*62) );
-	var b62_id = base62_encode( id );
-	var p_b62_id = pad( b62_id, 5 );
-	return p_b62_id;
+	var d = new Date();
+    var day = d.getDate();
+    var month = d.getMonth() + 1;
+    var year = d.getFullYear();
+    if (day < 10) {
+        day = "0" + day;
+    }
+    if (month < 10) {
+        month = "0" + month;
+    }
+    var date = year+""+month+""+day;
+    return date;
 	// TODO: ensure that it does not already exist
 }
 
@@ -507,9 +518,9 @@ function is_valid_group_request( request ) {
 }
 
 function is_valid_group_id( group_id ) {
-	if( group_id == null || typeof group_id != 'string' || group_id.length != 5 )
+	if( group_id == null || typeof group_id != 'string' || group_id.length != 8 )
 		return false;
-	if( ! /^[a-zA-Z0-9]{5}$/.test( group_id ))
+	if( ! /^[a-zA-Z0-9]{8}$/.test( group_id ))
 		return false;
 	var path = get_group_data_path( group_id );
 	if( ! fs.existsSync( path ))
